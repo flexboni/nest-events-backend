@@ -89,15 +89,22 @@ export class EventsController {
     //   relations: ['attendees'],
     // });
 
-    const event = await this.repository.findOne({ where: { id: 1 } });
+    // const event = await this.repository.findOne({ where: { id: 1 } });
 
-    const attendee = new Attendee();
-    attendee.name = 'Jerry';
-    attendee.event = event;
+    // const attendee = new Attendee();
+    // attendee.name = 'Jerry';
+    // attendee.event = event;
 
-    await this.attendeeRepository.save(attendee);
+    // await this.attendeeRepository.save(attendee);
 
-    return attendee;
+    // return attendee;
+
+    return await this.repository
+      .createQueryBuilder('e')
+      .select(['e.id', 'e.name'])
+      .orderBy('e.id', 'ASC')
+      .take(3)
+      .getMany();
   }
 
   @Get(':id')

@@ -10,6 +10,7 @@ import ormConfig from 'src/config/orm.config';
 import ormConfigProd from 'src/config/orm.config.prod';
 import { AppKoreaService } from 'src/events/app.korea.service';
 import { SchoolModule } from 'src/school/school.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SchoolModule } from 'src/school/school.module';
     }),
     EventsModule,
     SchoolModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
