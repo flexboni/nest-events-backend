@@ -5,20 +5,22 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
+import { Event } from 'src/events/event.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
   password: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
@@ -30,4 +32,7 @@ export class User {
   @OneToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
+
+  @OneToMany(() => Event, (event) => event.organizer)
+  organized: Event[];
 }
