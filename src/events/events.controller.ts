@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   ForbiddenException,
@@ -12,7 +13,9 @@ import {
   Patch,
   Post,
   Query,
+  SerializeOptions,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -25,6 +28,7 @@ import { ListEvents } from 'src/events/input/list.events';
 import { UpdateEventDto } from 'src/events/input/update-event.dto';
 
 @Controller('/events')
+@SerializeOptions({ strategy: 'excludeAll' })
 export class EventsController {
   private readonly logger = new Logger(EventsController.name);
 
@@ -32,78 +36,21 @@ export class EventsController {
 
   @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
+  @UseInterceptors(ClassSerializerInterceptor)
   async finalAll(@Query() filter: ListEvents) {
-    const events =
-      await this.eventsService.getEventsWithAttendeeCountFilteredPaginated(
-        filter,
-        {
-          total: true,
-          currentPage: filter.page,
-          limit: 10,
-        },
-      );
-
-    return events;
+    return await this.eventsService.getEventsWithAttendeeCountFilteredPaginated(
+      filter,
+      {
+        total: true,
+        currentPage: filter.page,
+        limit: 10,
+      },
+    );
   }
 
-  // @Get('practice')
-  // /**
-  //  * SELECT id, when
-  //  *   FROM event
-  //  *  WHERE (event.id > 3
-  //  *    AND event.when > '2021-02-12T13:00:00)
-  //  *     OR event.description LIKE '%meet%'
-  //  *  ORDER BY event.id DESC
-  //  *  LIMIT 2;
-  //  */
-  // async practice() {
-  //   return await this.repository.find({
-  //     select: ['id', 'when'],
-  //     where: [
-  //       {
-  //         id: MoreThan(3),
-  //         when: MoreThan(new Date('2021-02-12T13:00:00')),
-  //       },
-  //       {
-  //         description: Like('%meet%'),
-  //       },
-  //     ],
-  //     take: 2,
-  //     order: {
-  //       id: 'DESC',
-  //     },
-  //   });
-  // }
-
-  // @Get('practice2')
-  // async practice2() {
-  //   // return await this.repository.findOne({
-  //   //   where: { id: 1 },
-  //   //   relations: ['attendees'],
-  //   // });
-
-  //   // const event = await this.repository.findOne({ where: { id: 1 } });
-
-  //   // const attendee = new Attendee();
-  //   // attendee.name = 'Jerry';
-  //   // attendee.event = event;
-
-  //   // await this.attendeeRepository.save(attendee);
-
-  //   // return attendee;
-
-  //   return await this.repository
-  //     .createQueryBuilder('e')
-  //     .select(['e.id', 'e.name'])
-  //     .orderBy('e.id', 'ASC')
-  //     .take(3)
-  //     .getMany();
-  // }
-
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    // return await this.repository.findOne(id);
-
     const event = await this.eventsService.getEvent(id);
     if (!event) {
       throw new NotFoundException();
@@ -114,6 +61,7 @@ export class EventsController {
 
   @Post()
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() input: CreateEventDto, @CurrentUser() user: User) {
     console.log('i am here');
 
@@ -122,6 +70,7 @@ export class EventsController {
 
   @Patch(':id')
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   async update(
     @Param('id') id,
     @Body() input: UpdateEventDto,
